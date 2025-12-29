@@ -1,9 +1,14 @@
 import mongoose from 'mongoose'
 
-const userScheama = new mongoose.Schema({
-  email : {
+const userSchema = new mongoose.Schema({
+  username: {
     type: String,
     required: true,
+    unique: true,
+    trim:true
+  },
+  email : {
+    type: String,
     unique: true,
     lowercase: true,
     trim:true
@@ -12,12 +17,41 @@ const userScheama = new mongoose.Schema({
     type:String,
     required:true
   },
-  isEmailVerified: {
+  image: {
+    type: String,
+  },
+  emailVerified: {
     type: Boolean,
     default: false
   },
-
+  favoritesIds : {
+    type: [String],
+    default: []
+  },
+ accounts: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
+  }
+],
+sessions: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Session',
+  }
+]
 }, { timestamps: true })
 
-const User = mongoose.model('User', userScheama)
+userSchema.pre('findOneAndDelete', async function (next) {
+  const user = await this.model.findOne(this.getFilter())
+
+  if (user) {
+    await mongoose.model('Account').deleteMany({ userId: user._id })
+    await mongoose.model('Session').deleteMany({ userId: user._id })
+  }
+
+  next()
+})
+
+const User = mongoose.model('User', userSchema)
 export default User

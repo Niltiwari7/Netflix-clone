@@ -10,9 +10,9 @@ const routes = [
     component : () => import('../pages/BrowsePage.vue')
   },
   {
-    path: '/auth',
+    path: '/signin',
     name: 'Auth',
-    component : () => import('../pages/Auth.vue')
+    component : () => import('../pages/SignIn.vue')
   }
 ]
 
