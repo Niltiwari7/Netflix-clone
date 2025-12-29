@@ -119,58 +119,6 @@ export const login = async(req,res) => {
   }
 }
 
-export const refreshToken = async(req,res) => {
-  const {refreshToken} = req.body;
-
-  if(!refreshToken) {
-    return res.status(400).json({
-      error: {
-        message: 'Refresh token is required',
-        code: 'REFRESH_TOKEN_MISSING'
-      }
-    })
-  }
-
-  const storedToken = await RefreshToken.findOne({
-    token: refreshToken
-  })
-  if(!storedToken) {
-    return res.status(401).json({
-      error: {
-        message: 'Invalid refresh token',
-        code: 'INVALID_REFRESH_TOKEN'
-      }
-    })
-  }
-
-  if(storedToken.expiresAt < new Date()) {
-    return res.status(401).json({
-      error: {
-        message: 'Refresh token has expired',
-        code: 'REFRESH_TOKEN_EXPIRED'
-      }
-    })
-  }
-  try {
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-
-    const newAccessToken = await generateAccessToken({
-      userId: decoded.userId
-    })
-    return res.status(200).json({
-      accessToken: newAccessToken
-    })
-  } catch (error) {
-    console.error("Error while refreshing token:", error);
-    return res.status(500).json({
-      error: {
-        message: 'Internal server error while refreshing token',
-        code: 'INTERNAL_SERVER_ERROR'
-      }
-    })
-  }
-}
-
 export const logout = async(req,res) => {
   const {refreshToken} = req.body;
 
